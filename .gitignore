@@ -1,8 +1,44 @@
+# Node modules
 node_modules/
 dist/
-venv/
+dist-ssr/
+*.local
+
+# Python
 __pycache__/
-*.pyc
-.env
-data/
+*.py[cod]
+*$py.class
+venv/
+env/
+ENV/
+
+# Databases
 *.db
+*.sqlite3
+data/
+pg_data/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
