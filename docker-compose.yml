@@ -1,9 +1,14 @@
-version: '3.8'
+version: '3.9'
 
 services:
+
+  # ──────────────────────────────────────────────────────────────
+  # PostgreSQL 15 - Database
+  # ──────────────────────────────────────────────────────────────
   db:
     image: postgres:15-alpine
-    restart: always
+    container_name: agri_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -12,6 +17,47 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agri_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agri_net
+
+  # ──────────────────────────────────────────────────────────────
+  # Spring Boot Java Backend
+  # ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agri_backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: agri_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - agri_net
 
 volumes:
   pg_data:
+    driver: local
+
+networks:
+  agri_net:
+    driver: bridge

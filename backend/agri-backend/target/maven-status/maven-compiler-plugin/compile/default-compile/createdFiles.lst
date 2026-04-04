@@ -1,0 +1,16 @@
+com/agri/dashboard/model/CropYield.class
+com/agri/dashboard/AgriDashboardApplication.class
+com/agri/dashboard/service/DomesticConsumptionService.class
+com/agri/dashboard/config/WebConfig$1.class
+com/agri/dashboard/model/DomesticConsumption$DomesticConsumptionBuilder.class
+com/agri/dashboard/repository/CropYieldRepository.class
+com/agri/dashboard/model/EthanolTarget$EthanolTargetBuilder.class
+com/agri/dashboard/service/EthanolTargetService.class
+com/agri/dashboard/repository/EthanolTargetRepository.class
+com/agri/dashboard/config/WebConfig.class
+com/agri/dashboard/controller/AgriController.class
+com/agri/dashboard/model/DomesticConsumption.class
+com/agri/dashboard/repository/DomesticConsumptionRepository.class
+com/agri/dashboard/model/EthanolTarget.class
+com/agri/dashboard/model/CropYield$CropYieldBuilder.class
+com/agri/dashboard/service/CropYieldService.class

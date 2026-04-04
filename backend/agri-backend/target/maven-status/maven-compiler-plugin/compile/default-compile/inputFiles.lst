@@ -1,0 +1,12 @@
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/service/DomesticConsumptionService.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/repository/DomesticConsumptionRepository.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/repository/EthanolTargetRepository.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/controller/AgriController.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/model/CropYield.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/repository/CropYieldRepository.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/model/DomesticConsumption.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/config/WebConfig.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/AgriDashboardApplication.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/model/EthanolTarget.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/service/EthanolTargetService.java
+/home/priyan/Devops/agri-dashboard/backend/agri-backend/src/main/java/com/agri/dashboard/service/CropYieldService.java
