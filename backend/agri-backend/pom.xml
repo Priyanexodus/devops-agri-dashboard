@@ -22,7 +22,9 @@
   <properties>
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <flyway.version>10.11.0</flyway.version>
+    <!-- Flyway version managed by Spring Boot 3.2.5 BOM → 9.22.x -->
+    <!-- PostgreSQL support is bundled inside flyway-core in Flyway 9.x -->
+    <!-- No private repos required — all on public Maven Central -->
   </properties>
 
   <dependencies>
@@ -53,17 +55,11 @@
     </dependency>
 
     <!-- Flyway Core — DB Schema Migrations -->
+    <!-- Version managed by Spring Boot BOM (9.22.x). -->
+    <!-- PostgreSQL support is built into flyway-core in Flyway 9.x. -->
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
-      <version>${flyway.version}</version>
-    </dependency>
-
-    <!-- Flyway PostgreSQL dialect support (required for Flyway 10+) -->
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
-      <version>${flyway.version}</version>
     </dependency>
 
     <!-- Lombok — eliminates boilerplate getters/setters/constructors -->
