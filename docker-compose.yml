@@ -35,7 +35,7 @@ services:
     container_name: agri_backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8082:8080"
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432

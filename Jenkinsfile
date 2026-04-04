@@ -15,6 +15,8 @@ pipeline {
         BACKEND_DIR  = 'backend/agri-backend'
         COMPOSE_FILE = 'docker-compose.yml'
         MAVEN_OPTS   = '-Xmx512m'
+        // Host port exposed by docker-compose (container internal port is always 8080)
+        APP_PORT     = '8082'
     }
 
     options {
@@ -121,7 +123,7 @@ pipeline {
                 echo '==> Waiting for Spring Boot backend to become healthy...'
                 sh '''
                     for i in $(seq 1 18); do
-                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/health 2>/dev/null || echo "000")
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${APP_PORT}/api/health 2>/dev/null || echo "000")
                         if [ "$STATUS" = "200" ]; then
                             echo "Backend UP (HTTP 200) after attempt $i"
                             exit 0
@@ -144,19 +146,19 @@ pipeline {
                 echo '==> [Stage 7] Running API smoke tests'
                 sh '''
                     echo "--- /api/health ---"
-                    curl -sf http://localhost:8080/api/health
+                    curl -sf http://localhost:${APP_PORT}/api/health
 
                     echo "--- /api/yields ---"
-                    YIELDS=$(curl -sf http://localhost:8080/api/yields)
+                    YIELDS=$(curl -sf http://localhost:${APP_PORT}/api/yields)
                     echo "Response: $YIELDS"
                     echo "$YIELDS" | python3 -c "import sys,json; data=json.load(sys.stdin); assert isinstance(data,list), 'not a list'; print(f'yields: {len(data)} records')"
 
                     echo "--- /api/consumption ---"
-                    CONS=$(curl -sf http://localhost:8080/api/consumption)
+                    CONS=$(curl -sf http://localhost:${APP_PORT}/api/consumption)
                     echo "$CONS" | python3 -c "import sys,json; data=json.load(sys.stdin); assert isinstance(data,list); print(f'consumption: {len(data)} records')"
 
                     echo "--- /api/ethanol-targets ---"
-                    ETH=$(curl -sf http://localhost:8080/api/ethanol-targets)
+                    ETH=$(curl -sf http://localhost:${APP_PORT}/api/ethanol-targets)
                     echo "$ETH" | python3 -c "import sys,json; data=json.load(sys.stdin); assert isinstance(data,list); print(f'ethanol targets: {len(data)} records')"
 
                     echo "==> All smoke tests PASSED"
@@ -168,7 +170,7 @@ pipeline {
     post {
         success {
             echo "✅ Pipeline SUCCESS — Build #${env.BUILD_NUMBER}"
-            echo "   Backend running locally at http://localhost:8080"
+            echo "   Backend running locally at http://localhost:${APP_PORT}"
             echo "   Local image: ${LOCAL_IMAGE}"
         }
         failure {
