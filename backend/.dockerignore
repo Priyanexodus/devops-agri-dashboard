@@ -1,0 +1,30 @@
+# Keep Docker build context small and local-only
+# Prevents large/irrelevant directories from being sent to the Docker daemon
+
+# Frontend (not part of the backend image)
+frontend/
+frontend/node_modules/
+
+# Old Python backend files
+backend/venv/
+backend/__pycache__/
+backend/*.py
+backend/get-pip.py
+backend/requirements.txt
+
+# Git history
+.git/
+
+# Maven wrapper and IDE files
+**/.idea/
+**/*.iml
+**/.classpath
+**/.project
+**/.settings/
+
+# Test reports and build outputs (JAR is re-built inside Docker)
+backend/agri-backend/target/
+
+# OS noise
+**/.DS_Store
+**/Thumbs.db
