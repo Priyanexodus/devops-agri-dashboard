@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area, 
@@ -72,6 +72,37 @@ export default function Dashboard() {
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
   const [draftFilters, setDraftFilters] = useState(defaultFilters);
 
+  // ── API State ──────────────────────────────────────────────────
+  const [apiStatus, setApiStatus] = useState<'loading' | 'connected' | 'error'>('loading');
+  const [liveYields, setLiveYields] = useState<Array<{cropName: string; year: number; yieldAmount: number; region: string}>>([]);
+  const [liveConsumption, setLiveConsumption] = useState<Array<{cropName: string; year: number; consumptionAmount: number; region: string}>>([]);
+  const [liveEthanol, setLiveEthanol] = useState<Array<{year: number; targetBlendingPercentage: number; achievedBlendingPercentage: number}>>([]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [yieldsRes, consumptionRes, ethanolRes] = await Promise.all([
+          fetch('/api/yields'),
+          fetch('/api/consumption'),
+          fetch('/api/ethanol-targets'),
+        ]);
+        if (!yieldsRes.ok || !consumptionRes.ok || !ethanolRes.ok) throw new Error('API error');
+        const [yields, consumption, ethanol] = await Promise.all([
+          yieldsRes.json(),
+          consumptionRes.json(),
+          ethanolRes.json(),
+        ]);
+        setLiveYields(yields);
+        setLiveConsumption(consumption);
+        setLiveEthanol(ethanol);
+        setApiStatus('connected');
+      } catch {
+        setApiStatus('error');
+      }
+    };
+    fetchAll();
+  }, []);
+
   // Derive Data based on filters
   const targetMultiplier = appliedFilters.blendingTarget / 20.0;
   const cropFilterMultiplier = appliedFilters.crops.length / CROP_OPTIONS.length;
@@ -103,12 +134,36 @@ export default function Dashboard() {
     volume: Number((d.volume * targetMultiplier * globalMux).toFixed(1))
   })), [targetMultiplier, globalMux]);
 
-  const areaChartData = useMemo(() => baseAreaChartData.map(d => ({
-    ...d,
-    production: d.production * (regionMux[appliedFilters.region] || 1.0),
-    needs: d.needs * (regionMux[appliedFilters.region] || 1.0),
-    forecast: d.forecast * (regionMux[appliedFilters.region] || 1.0)
-  })), [appliedFilters.region]);
+  // ── Area chart: merge live API data with static structure ──────
+  const areaChartData = useMemo(() => {
+    if (liveYields.length > 0 && liveConsumption.length > 0) {
+      // Build per-year totals from live data, filtered by selected region
+      const regionFilter = appliedFilters.region === 'All India' ? null : appliedFilters.region;
+      const years = [...new Set(liveYields.map(y => y.year))].sort();
+      return years.map(yr => {
+        const prod = liveYields
+          .filter(y => y.year === yr && (!regionFilter || y.region === regionFilter) && appliedFilters.crops.includes(y.cropName))
+          .reduce((s, y) => s + y.yieldAmount, 0);
+        const needs = liveConsumption
+          .filter(c => c.year === yr && (!regionFilter || c.region === regionFilter) && appliedFilters.crops.includes(c.cropName))
+          .reduce((s, c) => s + c.consumptionAmount, 0);
+        const isForecast = yr >= 2025;
+        return {
+          year: String(yr),
+          production: Number((prod * (regionMux[appliedFilters.region] || 1.0) * seasonMux).toFixed(1)),
+          needs: Number((needs * (regionMux[appliedFilters.region] || 1.0) * seasonMux).toFixed(1)),
+          forecast: isForecast ? Number((prod * 1.05 * seasonMux).toFixed(1)) : 0,
+        };
+      });
+    }
+    // fallback to static data while loading
+    return baseAreaChartData.map(d => ({
+      ...d,
+      production: d.production * (regionMux[appliedFilters.region] || 1.0),
+      needs: d.needs * (regionMux[appliedFilters.region] || 1.0),
+      forecast: d.forecast * (regionMux[appliedFilters.region] || 1.0),
+    }));
+  }, [liveYields, liveConsumption, appliedFilters.region, appliedFilters.crops, regionMux, seasonMux]);
 
   const toggleDraftCrop = (crop: string) => {
     setDraftFilters(prev => {
@@ -147,6 +202,17 @@ export default function Dashboard() {
                </span>
                <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-full border border-indigo-200">
                  {appliedFilters.region}
+               </span>
+               <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                 apiStatus === 'connected' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                 apiStatus === 'error'     ? 'bg-red-100 text-red-800 border-red-200' :
+                                            'bg-gray-100 text-gray-500 border-gray-200'
+               }`}>
+                 <span className={`w-2 h-2 rounded-full ${
+                   apiStatus === 'connected' ? 'bg-emerald-500 animate-pulse' :
+                   apiStatus === 'error'     ? 'bg-red-500' : 'bg-gray-400 animate-pulse'
+                 }`} />
+                 {apiStatus === 'loading' ? 'Connecting...' : apiStatus === 'connected' ? `Live · ${liveYields.length} records` : 'Backend Offline'}
                </span>
             </div>
             
