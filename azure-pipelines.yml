@@ -6,7 +6,7 @@
 trigger:
 - main
 
-pool: local-priyan
+pool: TestAgent
 
 steps:
 - task: Maven@3
